@@ -1,5 +1,21 @@
 #!/usr/bin/env python
-import sys
+'''
+Vcf2AxiomMyDesign: mining out SNPs from a vcf file and it's reference to a file ready for submission to the Axiom myDesign custom probe pipeline.
+
+Usage:
+    Vcf2AxiomMyDesign.py -s species -v file.vcf -r ref.fa [--minindiv 20] [-o outfile.tsv]
+
+Options:
+    -s STRING, --species=STRING  Your species name
+    -v FILE, --vcf=FILE          A vcf file
+    -r FILE, --fasta=FILE        The matching reference fasta file
+    --minindiv=INT               Minimum number of individuals with genotypes
+                                  for a position to be output [default: 1]
+    -o FILE, --out=FILE          output file [default: myDesign.tsv]
+
+'''
+
+from docopt import docopt
 import os
 from Bio import SeqIO
 
@@ -75,7 +91,7 @@ class vcf(object):
 
 def check_snp(s, min_dist, min_sam):
     #end 
-    if s.curr == None:
+    if s.curr is None:
         print "End!"
         return False
     
@@ -91,7 +107,9 @@ def check_snp(s, min_dist, min_sam):
 
     #check to make sure up and downstream snps are far enough away for probes to fit between
     for other in [s.up, s.down]:
-        if other == None:
+        if other is None:
+            continue
+        if other == 0:
             continue
         if s.curr['CHROM'] == other['CHROM']:
             if abs( int(s.curr['POS']) - int(other['POS'])) < min_dist:
@@ -100,13 +118,13 @@ def check_snp(s, min_dist, min_sam):
     return True
 
 
-def generate_design(org, fVcf, fRef, min_sam, outdir):
+def generate_design(org, fVcf, fRef, min_sam, outfile):
     probe_size = 35
     min_dist = probe_size * 2 #35 bp probe for each position
     my_vcf = vcf(fVcf)
     ref = SeqIO.index(fRef, 'fasta')
 
-    my_design=open(os.path.join(outdir,'myDesign.tsv'), 'w')
+    my_design=open(outfile, 'w')
     #write my design header
     my_design.write('Organism\tSNPId\tREF_STR\tSEQ\tCHR\tPOS\tSNP_NEIGHBOR\tSNP_PRIORITY\tSNP_VAL\tCHR_TYPE\n')
     ref_name = os.path.basename(fRef).rstrip('.fa')
@@ -124,8 +142,8 @@ def generate_design(org, fVcf, fRef, min_sam, outdir):
             my_design.write( '\t'.join([org, snpid, ref_name, seq, c, str(p), '0', '1', 'Il', 'autosomal']) + '\n' )
 
 def main():
-    (org, fVcf, fRef, min_indiv, outdir) = sys.argv[1:]
-    generate_design(org, fVcf, fRef, int(min_indiv), outdir)
+    args = docopt(__doc__)
+    generate_design(args['--species'], args['--vcf'], args['--fasta'], int(args['--minindiv']), args['--out'])
     
 if __name__ == '__main__':
     main()
