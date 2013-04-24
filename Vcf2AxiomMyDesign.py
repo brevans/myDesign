@@ -85,7 +85,7 @@ class vcf(object):
         for i,v in zip(self.cols,vals[:9]):
             tmp[i]=v
         for v in vals[9:]:
-            if v != './.':
+            if not v.startswith('./.'):
                 tmp['called_snps']+=1
         return tmp
 
