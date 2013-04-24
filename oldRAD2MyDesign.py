@@ -19,10 +19,10 @@ stacks_id chr_num chr pos seq relpos ref alt
 '''
 
 for snp_line in inf:
-    (stacks_id, chr_num, c, pos, seq, relpos, ref, alt) = snp_line.split('\t')
+    (stacks_id, chr_num, c, pos, seq, relpos, r, a) = snp_line.rstrip().split('\t')
     p = int(pos) + int(relpos)
-    ra = '[%s/%s]' % (ref, alt)
-    probe = str( ref[c][p-probe_size-1:p].seq + ra + ref[c][p+1:p+probe_size+1].seq )
+    ra = '[%s/%s]' % (r, a)
+    probe = str( ref[c][p-probe_size-1:p-1].seq + ra + ref[c][p+1:p+probe_size+1].seq )
     snpid = '%s_%d' % (c.replace('.', '_'), p)
     out.write( '\t'.join((org, snpid, ref_name, probe, c, str(p), '0', '1', 'Il', 'autosomal')) + '\n' )
 
