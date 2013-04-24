@@ -7,7 +7,7 @@ inf = open(sys.argv[1])
 reff = sys.argv[2]
 ref_name = os.path.basename(reff).rstrip('.fa')
 ref = SeqIO.index(reff, 'fasta')
-out = open(sys.argv[3])
+out = open(sys.argv[3], 'w')
 out.write('Organism\tSNPId\tREF_STR\tSEQ\tCHR\tPOS\tSNP_NEIGHBOR\tSNP_PRIORITY\tSNP_VAL\tCHR_TYPE\n')
 
 probe_size = 35
